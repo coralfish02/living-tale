@@ -1432,11 +1432,11 @@
                 <p id="summaryText"></p>
             </div>
 
-            <!-- 4コマ漫画セクション -->
+            <!-- ストーリーイメージセクション -->
             <div class="comic-section">
-                <h2 class="comic-title">4コマ漫画</h2>
+                <h2 class="comic-title">ストーリーイメージ</h2>
                 <div id="comicGrid" class="comic-grid">
-                    <div class="comic-loading">4コマ漫画を生成中...</div>
+                    <div class="comic-loading">ストーリーイメージを生成中...</div>
                 </div>
             </div>
         </div>
@@ -1905,9 +1905,9 @@
                 // ボタン非表示
                 document.getElementById('progressSection').classList.add('hidden');
 
-                showStatus('物語が完成しました！4コマ漫画を生成中...', 'ready');
+                showStatus('物語が完成しました！ストーリーイメージを生成中...', 'ready');
 
-                // 4コマ漫画のポーリング開始
+                // ストーリーイメージのポーリング開始
                 startComicPolling();
 
             } catch (error) {
@@ -1916,7 +1916,7 @@
             }
         }
 
-        // 4コマ漫画のポーリング
+        // ストーリーイメージのポーリング
         let comicPollingInterval = null;
 
         function startComicPolling() {
@@ -1934,7 +1934,7 @@
                     if (data.comic_status === 'complete') {
                         clearInterval(comicPollingInterval);
                         displayComicPanels(data.comic_images);
-                        showStatus('物語と4コマ漫画が完成しました！', 'ready');
+                        showStatus('物語とストーリーイメージが完成しました！', 'ready');
                     } else if (data.comic_status === 'generating') {
                         // 生成済みの画像があれば随時表示
                         if (data.comic_images && data.comic_images.length > 0) {
@@ -1942,10 +1942,10 @@
                         }
                     } else if (data.comic_status === 'error') {
                         clearInterval(comicPollingInterval);
-                        showStatus('4コマ漫画の生成に失敗しました', 'error');
+                        showStatus('ストーリーイメージの生成に失敗しました', 'error');
                     }
                 } catch (error) {
-                    console.error('4コマ漫画チェックエラー:', error);
+                    console.error('ストーリーイメージチェックエラー:', error);
                 }
             }, 5000);
         }
@@ -1954,7 +1954,7 @@
             const grid = document.getElementById('comicGrid');
             grid.innerHTML = `
                 <div class="comic-panel" id="comic-panel-0">
-                    <div class="comic-panel-header">16コマ漫画（起承転結）</div>
+                    <div class="comic-panel-header">ストーリーイメージ</div>
                     <div class="comic-image">
                         <div class="comic-generating">生成中...</div>
                     </div>
@@ -1979,7 +1979,7 @@
                     <div class="comic-panel-header">${panel.phase}</div>
                     <div class="comic-image" style="max-height: none; min-height: 400px;">
                         ${panel.image_url
-                            ? `<img src="${panel.image_url}" alt="16コマ漫画" loading="lazy" style="width: 100%; height: auto;">`
+                            ? `<img src="${panel.image_url}" alt="ストーリーイメージ" loading="lazy" style="width: 100%; height: auto;">`
                             : hasError
                                 ? `<div class="comic-generating">
                                     生成失敗
@@ -1994,7 +1994,7 @@
             `;
         }
 
-        // 4コマ漫画の再生成
+        // ストーリーイメージの再生成
         async function retryComicPanel(index, phase) {
             if (!sessionId) return;
             
