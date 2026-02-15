@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Living Tale - </title>
+    <style>
+        :root {
+            /* プライマリーカラー - Living Taleのブランドカラー */
+            --primary-blue: #4169E1;
+            --primary-light: #6B8BF0;
+            --primary-dark: #5568d3;
+            
+            /* キャラクター別カラー */
+            --tsuda-color: #FF8C42;
+            --risa-color: #9B87F5;
+            
+            /* 登場人物カード用カラー（2人分） */
+            --character-1-color: #FF6B9D; /* 1人目 - ピンク */
+            --character-2-color: #4ECDC4; /* 2人目 - ターコイズ */
+            
+            /* 起承転結のフェーズ別カラー */
+            --phase-ki-color: #4CAF50;    /* 起 - 緑（始まり） */
+            --phase-sho-color: #2196F3;   /* 承 - 青（展開） */
+            --phase-ten-color: #FF9800;   /* 転 - オレンジ（転換） */
+            --phase-ketsu-color: #9C27B0; /* 結 - 紫（結末） */
+            
+            /* 内心描写用 */
+            --thought-bg: rgba(0, 0, 0, 0.05);
+            --thought-border: #666666;
+            
+            /* ダークモード対応 */
+            --bg-primary: #FFFFFF;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #ddd;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1A1A2E;
+            --bg-secondary: #16213E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #E0E0E0;
+            --border-color: #2a2a3e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #FFD700;
+            min-height: 100vh;
+            padding: 10px;
+            transition: background 0.3s;
+        }
+
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #FFF8E7;
+            border: 4px solid #000;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        /* レスポンシブデザイン */
+        @media (min-width: 768px) {
+            .container {
+                padding: 40px;
+            }
+            body {
+                padding: 20px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1200px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            h1 {
+                font-size: 1.8em !important;
+            }
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+        }
+
+        /* ヘッダーとナビゲーション */
+        .header-section {
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            z-index: 100;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .header-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            border-bottom: 4px solid #FFD700;
+        }
+
+        h1 {
+            text-align: center;
+            color: #000;
+            margin-bottom: 10px;
+            font-size: 4.5em;
+            font-weight: 900;
+            font-style: italic;
+            text-shadow: 4px 4px 0px #FFD700;
+        }
+
+        [data-theme="dark"] h1 {
+            color: #FFF;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 4px 4px 0px rgba(255, 215, 0, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        [data-theme="dark"] .subtitle {
+            color: #E0E0E0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        /* プログレスバー */
+        .progress-container {
+            margin: 20px 0;
+            background: #FFF;
+            border-radius: 10px;
+            padding: 15px;
+            border: 3px solid #000;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #FFF;
+            border: 2px solid #000;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #FFD700;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        [data-theme="dark"] .progress-text {
+            color: #CCC;
+        }
+
+        /* サイドナビゲーション */
+        .side-nav {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 999;
+            display: none;
+            max-width: 150px;
+        }
+
+        .side-nav.visible {
+            display: block;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 10px 15px;
+            margin: 5px 0;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: bold;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .nav-item.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        @media (max-width: 1024px) {
+            .side-nav {
+                display: none;
+            }
+        }
+
+        /* モバイル用フローティングナビゲーション */
+        .mobile-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border-radius: 25px;
+            padding: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 50;
+            display: none;
+        }
+
+        .mobile-nav.visible {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mobile-nav-item {
+            padding: 10px 15px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .mobile-nav-item.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        @media (min-width: 1025px) {
+            .mobile-nav {
+                display: none !important;
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--primary-blue);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        [data-theme="dark"] label {
+            color: #FFF;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            background: #FFF;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #FFD700;
+        }
+
+        button {
+            background: #000;
+            color: #FFD700;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        button:disabled {
+            background: #666;
+            color: #DDD;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .phase-section {
+            margin-top: 30px;
+        }
+
+        .phase-title {
+            font-size: 1.5em;
+            color: #000;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 4px solid #FFD700;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .phase-title {
+            color: #888;
+        }
+
+        .story-title-display {
+            text-align: center;
+            margin: 20px 0 30px 0;
+            padding: 20px;
+            background: #FFD700;
+            border: 4px solid #000;
+            border-radius: 10px;
+        }
+
+        [data-theme="dark"] .story-title-display {
+            background: #2A2A3E;
+            border: 4px solid #FFD700;
+        }
+
+        .story-title-text {
+            color: #000;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        [data-theme="dark"] .story-title-text {
+            color: #FFD700;
+        }
+
+        .phase-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .phase-btn {
+            padding: 20px;
+            background: #FFF;
+            border: 3px solid #000;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: #000;
+        }
+
+        [data-theme="dark"] .phase-btn {
+            background: #FFF;
+            border: 3px solid #FFD700;
+            color: #000;
+        }
+
+        .phase-btn.active {
+            background: #FFD700;
+            color: #000;
+            border: 3px solid #000;
+        }
+
+        [data-theme="dark"] .phase-btn.active {
+            background: #FFD700;
+            color: #000;
+            border: 3px solid #000;
+        }
+
+        .phase-btn.completed {
+            background: #000;
+            color: #FFD700;
+            border: 3px solid #000;
+        }
+
+        [data-theme="dark"] .phase-btn.completed {
+            background: #FFD700;
+            color: #000;
+            border: 3px solid #000;
+        }
+
+        .direction-input {
+            margin-bottom: 20px;
+        }
+
+        .direction-input label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .direction-input label {
+            color: #888;
+        }
+
+        .direction-input textarea {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #000;
+            border-radius: 10px;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 80px;
+            background: #FFF;
+        }
+
+        /* 選択肢提案 */
+        .suggestions-container {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #FFFAE6;
+            border-radius: 10px;
+            border: 3px solid #FFD700;
+        }
+
+        .suggestions-title {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .suggestions-title {
+            color: #888;
+        }
+
+        .suggestions-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .suggestion-chip {
+            padding: 8px 15px;
+            background: #FFF;
+            border: 2px solid #000;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            color: #000;
+        }
+
+        .suggestion-chip:hover {
+            background: #FFD700;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .suggestions-loading {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-initializing {
+            background: #FFFAE6;
+            color: #000;
+            border: 3px solid #FFD700;
+        }
+
+        [data-theme="dark"] .status-initializing {
+            background: #2A2A3E;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+        }
+
+        .status-ready {
+            background: #FFD700;
+            color: #000;
+            border: 3px solid #000;
+        }
+
+        [data-theme="dark"] .status-ready {
+            background: #2A2A3E;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+        }
+
+        .status-generating {
+            background: #FFF;
+            color: #000;
+            border: 3px solid #FFD700;
+        }
+
+        [data-theme="dark"] .status-generating {
+            background: #2A2A3E;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+        }
+
+        .status-error {
+            background: #000;
+            color: #FFD700;
+            border: 3px solid #FFD700;
+        }
+
+        [data-theme="dark"] .status-error {
+            background: #2A2A3E;
+            color: #FF6B6B;
+            border: 3px solid #FF6B6B;
+        }
+
+        .character-card {
+            background: #FFF;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            color: #000;
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        [data-theme="dark"] .character-card {
+            background: #2A2A3E;
+            border-color: #FFD700;
+            color: #FFF;
+        }
+
+        /* 1人目のキャラクター */
+        .character-card.character-1 {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .character-card.character-1 .character-name {
+            color: #000;
+        }
+
+        /* 2人目のキャラクター */
+        .character-card.character-2 {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .character-card.character-2 .character-name {
+            color: #000;
+        }
+
+        .character-card strong {
+            color: #000;
+        }
+
+        [data-theme="dark"] .character-card strong {
+            color: #FFF;
+        }
+
+        .character-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #000;
+        }
+
+        [data-theme="dark"] .character-name {
+            color: #FFD700 !important;
+        }
+
+        [data-theme="dark"] .character-card div {
+            color: #FFF;
+        }
+
+        .conversation-item {
+            background: #FFF;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            box-shadow: -6px 0 0 #FFD700;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        [data-theme="dark"] .conversation-item {
+            background: #2A2A3E;
+            border: 3px solid #444;
+        }
+
+        /* フェーズ別の左バーカラー（すべて黄色シャドウ） */
+        .conversation-item[data-phase="ki"] {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .conversation-item[data-phase="sho"] {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .conversation-item[data-phase="ten"] {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .conversation-item[data-phase="ketsu"] {
+            box-shadow: -6px 0 0 #FFD700;
+        }
+
+        .conversation-item.highlight {
+            box-shadow: -8px 0 0 #FFD700, 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* フェーズ別のハイライト時の影の色（すべて黄色） */
+        .conversation-item[data-phase="ki"].highlight {
+            box-shadow: -8px 0 0 #FFD700, 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .conversation-item[data-phase="sho"].highlight {
+            box-shadow: -8px 0 0 #FFD700, 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .conversation-item[data-phase="ten"].highlight {
+            box-shadow: -8px 0 0 #FFD700, 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .conversation-item[data-phase="ketsu"].highlight {
+            box-shadow: -8px 0 0 #FFD700, 0 3px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .phase-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #FFD700;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            border: 2px solid #000;
+        }
+
+        /* フェーズバッジの色もフェーズに合わせる（すべて黄色に統一） */
+        .conversation-item[data-phase="ki"] .phase-badge {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .conversation-item[data-phase="sho"] .phase-badge {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .conversation-item[data-phase="ten"] .phase-badge {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .conversation-item[data-phase="ketsu"] .phase-badge {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .speaker-name {
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .narrative {
+            line-height: 1.8;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .all-thoughts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #ddd;
+        }
+
+        .all-thoughts {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .thoughts-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .thoughts-toggle {
+            background: var(--thought-bg);
+            border: 2px solid var(--thought-border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            color: var(--thought-border);
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        [data-theme="dark"] .thoughts-toggle {
+            color: #FFF;
+            border-color: #FFF;
+        }
+
+        .thoughts-toggle:hover {
+            background: #000;
+            color: #FFF;
+        }
+
+        [data-theme="dark"] .thoughts-toggle:hover {
+            background: #FFF;
+            color: #000;
+        }
+
+        .thoughts-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .thoughts-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .inner-thought {
+            font-style: italic;
+            color: #333;
+            padding: 10px 15px;
+            background: #FFFAE6;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            border: 2px solid #000;
+            box-shadow: -4px 0 0 #FFD700;
+            transition: all 0.3s;
+        }
+
+        .inner-thought:last-child {
+            margin-bottom: 0;
+        }
+
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #FFF;
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 円状ローディングアイコン */
+        .circular-loader {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .circular-loader .bar {
+            position: absolute;
+            width: 4px;
+            height: 12px;
+            background: #FFD700; /* 黄色 */
+            border-radius: 2px;
+            left: 50%;
+            top: 0;
+            transform-origin: 50% 30px;
+            animation: circularLoader 1.2s linear infinite;
+        }
+
+        /* 12個の長方形を円周上に配置 */
+        .circular-loader .bar:nth-child(1) {
+            transform: rotate(0deg) translateY(-30px);
+            animation-delay: 0s;
+        }
+
+        .circular-loader .bar:nth-child(2) {
+            transform: rotate(30deg) translateY(-30px);
+            animation-delay: 0.1s;
+        }
+
+        .circular-loader .bar:nth-child(3) {
+            transform: rotate(60deg) translateY(-30px);
+            animation-delay: 0.2s;
+        }
+
+        .circular-loader .bar:nth-child(4) {
+            transform: rotate(90deg) translateY(-30px);
+            animation-delay: 0.3s;
+        }
+
+        .circular-loader .bar:nth-child(5) {
+            transform: rotate(120deg) translateY(-30px);
+            animation-delay: 0.4s;
+        }
+
+        .circular-loader .bar:nth-child(6) {
+            transform: rotate(150deg) translateY(-30px);
+            animation-delay: 0.5s;
+        }
+
+        .circular-loader .bar:nth-child(7) {
+            transform: rotate(180deg) translateY(-30px);
+            animation-delay: 0.6s;
+        }
+
+        .circular-loader .bar:nth-child(8) {
+            transform: rotate(210deg) translateY(-30px);
+            animation-delay: 0.7s;
+        }
+
+        .circular-loader .bar:nth-child(9) {
+            transform: rotate(240deg) translateY(-30px);
+            animation-delay: 0.8s;
+        }
+
+        .circular-loader .bar:nth-child(10) {
+            transform: rotate(270deg) translateY(-30px);
+            animation-delay: 0.9s;
+        }
+
+        .circular-loader .bar:nth-child(11) {
+            transform: rotate(300deg) translateY(-30px);
+            animation-delay: 1.0s;
+        }
+
+        .circular-loader .bar:nth-child(12) {
+            transform: rotate(330deg) translateY(-30px);
+            animation-delay: 1.1s;
+        }
+
+        @keyframes circularLoader {
+            0% {
+                background: #FFD700; /* 黄色 */
+                opacity: 1;
+            }
+            25% {
+                background: #000; /* 黒 */
+                opacity: 0.8;
+            }
+            50% {
+                background: #FFD700; /* 黄色 */
+                opacity: 0.5;
+            }
+            75% {
+                background: #000; /* 黒 */
+                opacity: 0.8;
+            }
+            100% {
+                background: #FFD700; /* 黄色 */
+                opacity: 1;
+            }
+        }
+
+        /* ローディングメッセージ */
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .loading-text {
+            color: var(--text-primary);
+            font-size: 1.1em;
+            font-weight: bold;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .summary-section {
+            background: #000;
+            color: #FFD700;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 4px solid #FFD700;
+        }
+
+        [data-theme="dark"] .summary-section {
+            background: linear-gradient(135deg, #2a3a5c 0%, #1a2a4a 100%);
+        }
+
+        .summary-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .comic-section {
+            margin-top: 30px;
+            background: #FFF;
+            padding: 30px;
+            border-radius: 15px;
+            border: 4px solid #000;
+        }
+
+        [data-theme="dark"] .comic-section {
+            background: #2A2A3E;
+            border: 4px solid #000;
+        }
+
+        .comic-title {
+            font-size: 1.5em;
+            color: #000;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .comic-title {
+            color: #FFD700;
+        }
+
+        .comic-grid {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .comic-panel {
+            background: #FFF;
+            border: 4px solid #000;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+            position: relative;
+            transition: all 0.3s;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        [data-theme="dark"] .comic-panel {
+            background: #1A1A2E;
+            border: 4px solid #000;
+            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .comic-panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.15);
+        }
+
+        [data-theme="dark"] .comic-panel:hover {
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        .comic-panel-header {
+            background: #000;
+            color: #FFF;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            border: 2px solid #000;
+        }
+
+        [data-theme="dark"] .comic-panel-header {
+            background: #444;
+            color: #FFF;
+            border: 2px solid #666;
+        }
+
+        .comic-image {
+            width: 100%;
+            min-height: 300px;
+            max-height: 500px;
+            background: #FFFAE6;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+
+        [data-theme="dark"] .comic-image {
+            background: #16213E;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+        }
+
+        .comic-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .comic-retry-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            color: #FFD700;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .comic-retry-btn:hover {
+            background: #333;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .comic-panel.error {
+            border-color: #dc3545;
+        }
+
+        .comic-panel.error .comic-panel-header {
+            background: #dc3545;
+        }
+
+        /* ダークモード切り替えボタン */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #FFF;
+            border: 3px solid #000;
+            border-radius: 25px;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        [data-theme="dark"] .theme-toggle {
+            background: #2A2A3E;
+            border: 3px solid #FFD700;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            background: #000;
+        }
+
+        [data-theme="dark"] .theme-toggle:hover {
+            background: #FFD700;
+        }
+
+        .theme-text {
+            font-size: 1em;
+            font-weight: bold;
+            color: #000;
+            transition: color 0.3s;
+        }
+
+        .theme-toggle:hover .theme-text {
+            color: #FFF;
+        }
+
+        [data-theme="dark"] .theme-text {
+            color: #FFD700;
+        }
+
+        [data-theme="dark"] .theme-toggle:hover .theme-text {
+            color: #000;
+        }
+
+        /* スクロールトップボタン */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: #FFF;
+            color: #000;
+            border: 3px solid #000;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: -4px 4px 0 #FFD700;
+            transition: all 0.3s ease;
+            z-index: 998;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .scroll-top-btn.visible {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scroll-top-btn:hover {
+            background: #FFD700;
+            transform: translateY(-5px);
+            box-shadow: -6px 6px 0 #000;
+        }
+
+        .scroll-top-btn:active {
+            transform: translateY(-2px);
+            box-shadow: -3px 3px 0 #FFD700;
+        }
+
+        /* モバイルナビゲーションがある時は位置を調整 */
+        @media (max-width: 1024px) {
+            .scroll-top-btn {
+                bottom: 120px; /* モバイルナビの上に配置 */
+            }
+        }
+
+        /* コピーボタン */
+        .copy-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: var(--text-primary);
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        .copy-btn.copied {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+
+        /* ツールチップ */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1001;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85em;
+            white-space: nowrap;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 会話アイテムのアニメーション */
+        .conversation-item {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .comic-caption {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .comic-loading {
+            text-align: center;
+            padding: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .comic-loading {
+            color: #FFD700;
+        }
+
+        .comic-generating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #000;
+            font-size: 1.1em;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        [data-theme="dark"] .comic-generating {
+            color: #FFD700;
+        }
+
+        @keyframes pulse {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ダークモード切り替えボタン -->
+    <div class="tooltip">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="テーマ切り替え">
+            <span id="themeIcon" class="theme-text">Dark</span>
+        </button>
+        <span class="tooltiptext">ダークモード切り替え (Ctrl+K)</span>
+    </div>
+
+
+    <!-- スクロールトップボタン -->
+    <button class="scroll-top-btn" onclick="scrollToTop()" aria-label="トップに戻る" title="トップに戻る">
+        <span style="line-height: 1;">▲</span>
+    </button>
+
+    <div class="container">
+        <header class="header-section">
+            <h1>Living Tale</h1>
+            <p class="subtitle" style="font-size: 0.85em; margin-bottom: 10px;">リビング・テイル</p>
+            <p class="subtitle" style="font-size: 1.1em; margin-top: -10px; font-weight: 500; letter-spacing: 0.15em; font-style: italic;">育てる。生まれる。ストーリー。</p>
+            
+            <!-- プログレスバー -->
+            <div id="progressContainer" class="progress-container hidden">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="progress-text">準備中...</div>
+            </div>
+        </header>
+
+        <!-- サイドナビゲーション（デスクトップ用） -->
+        <nav id="sideNav" class="side-nav">
+            <a href="#characters" class="nav-item" onclick="scrollToSection('characters')">登場人物</a>
+            <a href="#summary" class="nav-item" onclick="scrollToSection('result')">要約</a>
+            <a href="#ki" class="nav-item" onclick="scrollToPhase('ki')">起</a>
+            <a href="#sho" class="nav-item" onclick="scrollToPhase('sho')">承</a>
+            <a href="#ten" class="nav-item" onclick="scrollToPhase('ten')">転</a>
+            <a href="#ketsu" class="nav-item" onclick="scrollToPhase('ketsu')">結</a>
+        </nav>
+
+        <!-- モバイルナビゲーション -->
+        <nav id="mobileNav" class="mobile-nav">
+            <a href="#ki" class="mobile-nav-item" onclick="scrollToPhase('ki')">起</a>
+            <a href="#sho" class="mobile-nav-item" onclick="scrollToPhase('sho')">承</a>
+            <a href="#ten" class="mobile-nav-item" onclick="scrollToPhase('ten')">転</a>
+            <a href="#ketsu" class="mobile-nav-item" onclick="scrollToPhase('ketsu')">結</a>
+        </nav>
+
+        <!-- セットアップセクション -->
+        <div id="setupSection" class="setup-section">
+            <label for="themeInput">物語のテーマを入力してください：</label>
+            <input type="text" id="themeInput" placeholder="物語のテーマを入力..." value="">
+            <p style="color: #666; font-size: 0.9em; margin-top: 8px;">例：野球部の先輩後輩の会話、喫茶店での偶然の再会、図書館での静かな出会い</p>
+            <br>
+            <button id="startBtn" onclick="startSession()">物語を開始</button>
+        </div>
+
+        <!-- キャラクター表示 -->
+        <section id="charactersSection" class="hidden" aria-labelledby="characters-title">
+            <h2 id="characters-title" class="phase-title">登場人物</h2>
+            <div id="charactersList"></div>
+        </section>
+
+        <!-- 会話表示 -->
+        <section id="conversationSection" class="hidden" aria-labelledby="story-title">
+            <h2 id="story-title" class="phase-title">生成された物語</h2>
+            <div id="storyTitleDisplay" class="story-title-display hidden">
+                <h3 id="storyTitleText" class="story-title-text"></h3>
+            </div>
+
+            <div id="conversationList"></div>
+        </section>
+
+        <!-- 物語の進行 -->
+        <div id="progressSection" class="hidden">
+            <h2 id="progressTitle" class="phase-title">物語の進行</h2>
+            
+            <!-- ステータス表示（物語の進行の中に配置） -->
+            <div id="statusSection" class="hidden" style="margin-bottom: 20px;">
+                <div id="statusMessage" class="status-message">
+                    <div id="statusContent"></div>
+                </div>
+            </div>
+            
+            <div id="progressContent" class="hidden">
+            <div class="phase-buttons">
+                <div class="phase-btn" id="phaseKi">起</div>
+                <div class="phase-btn" id="phaseSho">承</div>
+                <div class="phase-btn" id="phaseTen">転</div>
+                <div class="phase-btn" id="phaseKetsu">結</div>
+            </div>
+
+            <!-- 選択肢提案 -->
+            <div id="suggestionsContainer" class="suggestions-container hidden">
+                <div class="suggestions-title">AIからの提案（クリックで自動入力）</div>
+                <div id="suggestionsList" class="suggestions-list">
+                    <div class="suggestions-loading">提案を生成中...</div>
+                </div>
+            </div>
+
+            <div class="direction-input">
+                <label for="directionInput" id="directionLabel">「起」フェーズで次の要素を加える。要素を加えない場合は空欄のまま「次へ進む」をクリック：</label>
+                <textarea id="directionInput" placeholder="例: 思わぬ秘密が明らかになってほしい"></textarea>
+            </div>
+
+            <button id="continueBtn" onclick="continueStory()">次へ進む</button>
+            </div>
+        </div>
+
+        <!-- 最終結果 -->
+        <div id="resultSection" class="hidden">
+            <div id="summarySection" class="summary-section">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <h2 class="summary-title">物語の要約</h2>
+                    <button class="copy-btn" onclick="copySummary()" title="要約をコピー">コピー</button>
+                </div>
+                <p id="summaryText"></p>
+            </div>
+
+            <!-- 4コマ漫画セクション -->
+            <div class="comic-section">
+                <h2 class="comic-title">4コマ漫画</h2>
+                <div id="comicGrid" class="comic-grid">
+                    <div class="comic-loading">4コマ漫画を生成中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let currentPhase = null;
+        let statusCheckInterval = null;
+        let characters = [];
+        let thoughtsCollapsed = localStorage.getItem('thoughtsCollapsed') === 'true';
+        let lastProcessedPhase = null; // 最後に処理したフェーズを記録（重複実行防止）
+
+        // テキストを表示用に整形する関数
+        function formatText(text) {
+            if (!text) return '';
+            // すべての改行を削除し、自然な文章として表示
+            // 改行コード(\n)をスペースに置き換える
+            return text.replace(/\n+/g, ' ').trim();
+        }
+
+        async function startSession() {
+            const theme = document.getElementById('themeInput').value.trim();
+            if (!theme) {
+                alert('テーマを入力してください');
+                return;
+            }
+
+            console.log('[DEBUG] startSession called with theme:', theme);
+
+            // UI更新
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.textContent = '初期化中...';
+            showStatus('初期化中...', 'initializing');
+
+            try {
+                console.log('[DEBUG] Sending POST request to /start');
+                const response = await fetch('/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ theme })
+                });
+
+                console.log('[DEBUG] Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`サーバーエラー (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('[DEBUG] Response data:', data);
+                
+                if (!data.session_id) {
+                    throw new Error('セッションIDが取得できませんでした');
+                }
+
+                sessionId = data.session_id;
+                console.log('[DEBUG] Session ID:', sessionId);
+
+                // ステータスチェック開始
+                startStatusCheck();
+
+            } catch (error) {
+                console.error('[ERROR] startSession error:', error);
+                alert('エラーが発生しました: ' + error.message + '\n\nブラウザのコンソール（F12）で詳細を確認してください。');
+                showStatus('エラーが発生しました: ' + error.message, 'error');
+                startBtn.disabled = false;
+                startBtn.textContent = '物語を開始';
+            }
+        }
+
+        function startStatusCheck() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+            }
+
+            statusCheckInterval = setInterval(async () => {
+                try {
+                    if (!sessionId) {
+                        console.error('[ERROR] sessionIdが設定されていません');
+                        clearInterval(statusCheckInterval);
+                        return;
+                    }
+
+                    console.log(`[DEBUG] ステータス確認: sessionId=${sessionId}`);
+                    const response = await fetch(`/status/${sessionId}`);
+                    
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            const errorData = await response.json().catch(() => ({}));
+                            console.error(`[ERROR] セッションが見つかりません (404): ${sessionId}`, errorData);
+                            clearInterval(statusCheckInterval);
+                            showStatus('エラー: セッションが見つかりません。もう一度お試しください。', 'error');
+                            const startBtn = document.getElementById('startBtn');
+                            if (startBtn) {
+                                startBtn.disabled = false;
+                                startBtn.textContent = '物語を開始';
+                            }
+                            return;
+                        }
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('[DEBUG] Status response:', data);
+
+                    if (data.error && data.status === 'not_found') {
+                        console.error('[ERROR] セッションが見つかりません:', data);
+                        clearInterval(statusCheckInterval);
+                        showStatus('エラー: セッションが見つかりません。もう一度お試しください。', 'error');
+                        const startBtn = document.getElementById('startBtn');
+                        if (startBtn) {
+                            startBtn.disabled = false;
+                            startBtn.textContent = '物語を開始';
+                        }
+                        return;
+                    }
+
+                    if (data.status === 'ready') {
+                        clearInterval(statusCheckInterval);
+                        onSessionReady(data);
+                    } else if (data.status === 'error') {
+                        clearInterval(statusCheckInterval);
+                        showStatus('エラー: ' + (data.error || '不明なエラー'), 'error');
+                        const startBtn = document.getElementById('startBtn');
+                        if (startBtn) {
+                            startBtn.disabled = false;
+                            startBtn.textContent = '物語を開始';
+                        }
+                    } else if (data.status === 'initializing') {
+                        showStatus(data.progress || '初期化中...', 'initializing');
+                    } else if (data.status === 'generating') {
+                        // 生成中はcurrentPhaseを更新しない（完了時にonPhaseContinueで更新される）
+                        // フェーズ名表示用に、data.current_phaseがあればそれを使用、なければcurrentPhaseを使用
+                        const phaseForDisplay = data.current_phase || currentPhase || 'ki';
+                        // フェーズ名はshowStatus内でcurrentPhaseから取得（生成中のフェーズを表示）
+                        // ただし、currentPhaseは更新しない（完了時に更新される）
+                        showStatus('', 'generating');
+                    } else if (data.status === 'continue') {
+                        // UIを即座に更新
+                        console.log('[DEBUG] Status continue received:', data);
+                        onPhaseContinue(data);
+                        // ステータスチェックは継続（次の生成のため）
+                        showStatus('次のフェーズへ進めます', 'ready');
+                    } else if (data.status === 'complete') {
+                        clearInterval(statusCheckInterval);
+                        onStoryComplete(data);
+                    } else if (data.next_phase) {
+                        // next_phaseが直接返ってきた場合も処理
+                        console.log('[DEBUG] next_phase received:', data.next_phase);
+                        if (data.next_phase !== 'complete') {
+                            currentPhase = data.next_phase;
+                            // プログレスバーは更新しない（フェーズ完了時に更新）
+                            updateNavigationActive(currentPhase);
+                            updateDirectionLabel();
+                        }
+                    }
+                } catch (error) {
+                    console.error('[ERROR] ステータス取得エラー:', error);
+                    // エラーが続く場合は、ポーリングを停止
+                    if (error.message && error.message.includes('404')) {
+                        clearInterval(statusCheckInterval);
+                        showStatus('エラー: セッションが見つかりません。もう一度お試しください。', 'error');
+                    }
+                }
+            }, 2000); // 2秒ごとにチェック
+        }
+
+        function onSessionReady(data) {
+            showStatus('準備完了！', 'ready');
+
+            // セットアップセクション非表示
+            document.getElementById('setupSection').classList.add('hidden');
+
+            // キャラクター表示
+            displayCharacters(data.characters);
+
+            // 物語の題名を表示
+            if (data.story_title) {
+                const storyTitleDisplay = document.getElementById('storyTitleDisplay');
+                const storyTitleText = document.getElementById('storyTitleText');
+                if (storyTitleDisplay && storyTitleText) {
+                    storyTitleText.textContent = data.story_title;
+                    storyTitleDisplay.classList.remove('hidden');
+                }
+            }
+
+            // 進行セクション表示
+            const progressSection = document.getElementById('progressSection');
+            const progressTitle = document.getElementById('progressTitle');
+            const progressContent = document.getElementById('progressContent');
+            
+            if (progressSection) progressSection.classList.remove('hidden');
+            if (progressTitle) progressTitle.classList.remove('hidden');
+            if (progressContent) progressContent.classList.remove('hidden');
+            
+            document.getElementById('phaseKi').classList.add('active');
+            currentPhase = 'ki';
+            
+            // プログレスバーは起フェーズ開始時は0%のまま（完了時に25%に更新）
+            // 初期状態では0%を表示
+            const progressContainer = document.getElementById('progressContainer');
+            if (progressContainer) {
+                progressContainer.classList.remove('hidden');
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('progressText').textContent = '進行状況: 0%';
+            }
+            
+            // ラベルを初期化
+            updateDirectionLabel();
+
+            // 会話セクション表示
+            document.getElementById('conversationSection').classList.remove('hidden');
+        }
+
+        function displayCharacters(charData) {
+            characters = charData;
+            const section = document.getElementById('charactersSection');
+            const list = document.getElementById('charactersList');
+
+            list.innerHTML = charData.map((char, index) => `
+                <div class="character-card character-${index + 1}">
+                    <div class="character-name">${char.name} (${char.age}歳)</div>
+                    <div><strong>表の顔:</strong> ${char.public_persona}</div>
+                    <div><strong>秘密の目的:</strong> ${char.secret_goal}</div>
+                    <div><strong>話し方:</strong> ${char.speech_style}</div>
+                </div>
+            `).join('');
+
+            section.classList.remove('hidden');
+        }
+
+        async function continueStory() {
+            const direction = document.getElementById('directionInput').value.trim();
+
+            document.getElementById('continueBtn').disabled = true;
+            
+            // 最初のきっかけ入力時はcurrentPhaseがnullの可能性があるので、'ki'をデフォルトとして設定
+            if (!currentPhase) {
+                currentPhase = 'ki';
+            }
+            
+            // フェーズ名はshowStatus内でcurrentPhaseから取得
+            showStatus('', 'generating');
+
+            try {
+                const response = await fetch('/continue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        direction: direction
+                    })
+                });
+
+                // ステータスチェック再開
+                startStatusCheck();
+
+            } catch (error) {
+                console.error('エラー:', error);
+                showStatus('エラーが発生しました: ' + error.message, 'error');
+                document.getElementById('continueBtn').disabled = false;
+            }
+        }
+
+        function onPhaseContinue(data) {
+            console.log('[DEBUG] onPhaseContinue called, currentPhase:', currentPhase, 'data:', data);
+
+            // 次のフェーズを取得
+            const nextPhase = data.next_phase || data.current_phase;
+
+            // ★ 重複実行防止：同じフェーズへの遷移は1回だけ
+            if (nextPhase === lastProcessedPhase) {
+                console.log('[DEBUG] このフェーズは既に処理済みです:', nextPhase);
+                return;
+            }
+
+            // フェーズ完了マーク
+            const phaseMap = { 'ki': 'phaseKi', 'sho': 'phaseSho', 'ten': 'phaseTen', 'ketsu': 'phaseKetsu' };
+            
+            // 完了したフェーズを計算（nextPhaseの前のフェーズ）
+            const phaseOrder = ['ki', 'sho', 'ten', 'ketsu'];
+            let completedPhase = currentPhase; // デフォルトはcurrentPhase
+            
+            if (nextPhase && nextPhase !== 'complete') {
+                const nextIndex = phaseOrder.indexOf(nextPhase);
+                if (nextIndex > 0) {
+                    // nextPhaseの前のフェーズが完了したフェーズ
+                    completedPhase = phaseOrder[nextIndex - 1];
+                } else if (nextIndex === 0) {
+                    // nextPhaseが'ki'の場合、完了したフェーズはない（初回）
+                    completedPhase = null;
+                }
+            }
+            
+            // 会話表示更新（先に更新してからフェーズを変更）
+            if (data.conversation && data.conversation.length > 0) {
+                displayConversations(data.conversation);
+            }
+
+            // 完了したフェーズをマーク
+            if (completedPhase && phaseMap[completedPhase]) {
+                const currentElement = document.getElementById(phaseMap[completedPhase]);
+                console.log('[DEBUG] Marking phase as completed:', completedPhase);
+                if (currentElement) {
+                    currentElement.classList.remove('active');
+                    currentElement.classList.add('completed');
+                }
+                
+                // 完了したフェーズのパーセンテージに更新
+                updateProgress(completedPhase, true);
+            }
+
+            // 次のフェーズへ
+            if (nextPhase && nextPhase !== 'complete' && nextPhase !== completedPhase) {
+                console.log('[DEBUG] Moving to next phase:', nextPhase);
+                
+                // currentPhaseを更新
+                currentPhase = nextPhase;
+                
+                // プログレスバーは更新しない（次のフェーズが完了するまで待つ）
+                
+                // 次のフェーズをアクティブに
+                const nextElement = document.getElementById(phaseMap[currentPhase]);
+                if (nextElement) {
+                    // 既存のactiveクラスを削除
+                    document.querySelectorAll('.phase-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    nextElement.classList.add('active');
+                    console.log('[DEBUG] Phase button activated:', currentPhase);
+                }
+                
+                // ナビゲーションのアクティブ状態を更新
+                updateNavigationActive(currentPhase);
+                
+                // 入力欄とボタンをリセット
+                const directionInput = document.getElementById('directionInput');
+                const continueBtn = document.getElementById('continueBtn');
+                if (directionInput) directionInput.value = '';
+                if (continueBtn) {
+                    continueBtn.disabled = false;
+                    continueBtn.textContent = '次へ進む';
+                }
+
+                // ★ 処理済みフェーズを記録（重複実行防止）
+                lastProcessedPhase = nextPhase;
+
+                // ラベルを更新
+                updateDirectionLabel();
+            } else if (nextPhase === 'complete') {
+                // 完了の場合
+                console.log('[DEBUG] Story complete');
+                if (currentPhase && phaseMap[currentPhase]) {
+                    const currentElement = document.getElementById(phaseMap[currentPhase]);
+                    if (currentElement) {
+                        currentElement.classList.remove('active');
+                        currentElement.classList.add('completed');
+                    }
+                }
+                // 結フェーズが完了したので100%に
+                updateProgress('ketsu', true);
+            }
+        }
+
+        // ナビゲーションのアクティブ状態を更新
+        function updateNavigationActive(phase) {
+            const phaseMap = { 'ki': '起', 'sho': '承', 'ten': '転', 'ketsu': '結' };
+            const phaseName = phaseMap[phase];
+            
+            document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.trim() === phaseName) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function displayConversations(conversations) {
+            const list = document.getElementById('conversationList');
+            
+            const phaseNames = {
+                'ki': '起',
+                'sho': '承',
+                'ten': '転',
+                'ketsu': '結'
+            };
+
+            list.innerHTML = conversations.map((conv, index) => {
+                const thoughts = conv.all_inner_thoughts || [{ character: conv.speaker, thought: conv.inner_thought }];
+                const thoughtsHtml = thoughts.map(thought => `
+                    <div class="inner-thought">
+                        <strong>${thought.character}の内心:</strong> ${thought.thought}
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="conversation-item" id="conv-${index}" data-phase="${conv.phase}" data-speaker="${conv.speaker}">
+                        <div class="phase-badge">${phaseNames[conv.phase] || ''}</div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <button class="copy-btn" onclick="copyConversation(${index})" title="この会話をコピー">コピー</button>
+                        </div>
+                        <div class="narrative">${formatText(conv.narrative)}</div>
+                        ${thoughts.length > 0 ? `
+                            <div class="all-thoughts">
+                                <div class="thoughts-header" onclick="toggleThoughts(this)">
+                                    <span class="thoughts-toggle">${thoughtsCollapsed ? '内心を表示' : '内心を隠す'}</span>
+                                </div>
+                                <div class="thoughts-content ${thoughtsCollapsed ? 'collapsed' : ''}">
+                                    ${thoughtsHtml}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+
+            // ナビゲーションを表示
+            if (conversations.length > 0) {
+                document.getElementById('sideNav').classList.add('visible');
+                document.getElementById('mobileNav').classList.add('visible');
+            }
+        }
+
+        async function onStoryComplete(data) {
+            // ★ 重複実行防止
+            if (lastProcessedPhase === 'complete') {
+                console.log('[DEBUG] 物語完了処理は既に実行済みです');
+                return;
+            }
+            lastProcessedPhase = 'complete';
+
+            // 最後のフェーズ完了マーク
+            document.getElementById('phaseKi').classList.add('completed');
+            document.getElementById('phaseSho').classList.add('completed');
+            document.getElementById('phaseTen').classList.add('completed');
+            document.getElementById('phaseKetsu').classList.remove('active');
+            document.getElementById('phaseKetsu').classList.add('completed');
+
+            // 会話表示更新
+            displayConversations(data.conversation || []);
+
+            // 最終結果取得
+            try {
+                const response = await fetch(`/result/${sessionId}`);
+                const result = await response.json();
+
+                // 要約表示
+                document.getElementById('summaryText').textContent = formatText(result.summary);
+                document.getElementById('resultSection').classList.remove('hidden');
+
+                // ナビゲーションの「要約」をアクティブに
+                const sideNav = document.getElementById('sideNav');
+                if (sideNav) {
+                    const summaryNav = sideNav.querySelector('a[href="#summary"]');
+                    if (summaryNav) {
+                        document.querySelectorAll('.nav-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+                        summaryNav.classList.add('active');
+                    }
+                }
+
+                // ボタン非表示
+                document.getElementById('progressSection').classList.add('hidden');
+
+                showStatus('物語が完成しました！4コマ漫画を生成中...', 'ready');
+
+                // 4コマ漫画のポーリング開始
+                startComicPolling();
+
+            } catch (error) {
+                console.error('結果取得エラー:', error);
+                showStatus('結果の取得に失敗しました', 'error');
+            }
+        }
+
+        // 4コマ漫画のポーリング
+        let comicPollingInterval = null;
+
+        function startComicPolling() {
+            // 初期表示（生成中プレースホルダー）
+            displayComicPlaceholders();
+
+            // 5秒ごとにチェック
+            comicPollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/comic/${sessionId}`);
+                    const data = await response.json();
+
+                    console.log('[DEBUG] Comic status:', data.comic_status, 'Images:', data.comic_images);
+
+                    if (data.comic_status === 'complete') {
+                        clearInterval(comicPollingInterval);
+                        displayComicPanels(data.comic_images);
+                        showStatus('物語と4コマ漫画が完成しました！', 'ready');
+                    } else if (data.comic_status === 'generating') {
+                        // 生成済みの画像があれば随時表示
+                        if (data.comic_images && data.comic_images.length > 0) {
+                            displayComicPanels(data.comic_images);
+                        }
+                    } else if (data.comic_status === 'error') {
+                        clearInterval(comicPollingInterval);
+                        showStatus('4コマ漫画の生成に失敗しました', 'error');
+                    }
+                } catch (error) {
+                    console.error('4コマ漫画チェックエラー:', error);
+                }
+            }, 5000);
+        }
+
+        function displayComicPlaceholders() {
+            const grid = document.getElementById('comicGrid');
+            grid.innerHTML = `
+                <div class="comic-panel" id="comic-panel-0">
+                    <div class="comic-panel-header">16コマ漫画（起承転結）</div>
+                    <div class="comic-image">
+                        <div class="comic-generating">生成中...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayComicPanels(comicImages) {
+            const grid = document.getElementById('comicGrid');
+
+            if (comicImages.length === 0) {
+                grid.innerHTML = '<div class="comic-loading">漫画を生成中...</div>';
+                return;
+            }
+
+            const panel = comicImages[0]; // 1枚の画像のみ
+            const hasError = panel.error || (!panel.image_url && panel.status === 'failed');
+            const isGenerating = !panel.image_url && !hasError;
+
+            grid.innerHTML = `
+                <div class="comic-panel ${hasError ? 'error' : ''}">
+                    <div class="comic-panel-header">${panel.phase}</div>
+                    <div class="comic-image" style="max-height: none; min-height: 400px;">
+                        ${panel.image_url
+                            ? `<img src="${panel.image_url}" alt="16コマ漫画" loading="lazy" style="width: 100%; height: auto;">`
+                            : hasError
+                                ? `<div class="comic-generating">
+                                    生成失敗
+                                    <button class="comic-retry-btn" onclick="retryComicPanel(0, '全体')">
+                                        再生成
+                                    </button>
+                                   </div>`
+                                : `<div class="comic-generating">生成中...</div>`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        // 4コマ漫画の再生成
+        async function retryComicPanel(index, phase) {
+            if (!sessionId) return;
+            
+            const panel = document.querySelector(`[data-index="${index}"]`);
+            if (panel) {
+                panel.querySelector('.comic-image').innerHTML = '<div class="comic-generating">再生成中...</div>';
+            }
+
+            try {
+                const response = await fetch(`/comic/retry/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phase: phase, index: index })
+                });
+
+                if (response.ok) {
+                    // ポーリングを再開
+                    startComicPolling();
+                } else {
+                    alert('再生成に失敗しました');
+                }
+            } catch (error) {
+                console.error('再生成エラー:', error);
+                alert('再生成に失敗しました: ' + error.message);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusSection = document.getElementById('statusSection');
+            const statusMessage = document.getElementById('statusMessage');
+            const statusContent = document.getElementById('statusContent');
+
+            if (!statusSection || !statusMessage || !statusContent) {
+                console.error('[ERROR] Status elements not found');
+                return;
+            }
+
+            statusMessage.className = 'status-message status-' + type;
+            
+            // 初期化中または生成中の場合はローディングアイコンを表示
+            if (type === 'initializing' || type === 'generating') {
+                // 生成中の場合は現在のフェーズ名を表示
+                let displayMessage = message;
+                if (type === 'generating') {
+                    const phaseNames = {
+                        'ki': '起',
+                        'sho': '承',
+                        'ten': '転',
+                        'ketsu': '結'
+                    };
+                    // currentPhaseが設定されている場合はそれを使用
+                    const phase = currentPhase || 'ki';
+                    const phaseName = phaseNames[phase] || '起';
+                    displayMessage = `「${phaseName}」を生成中...`;
+                }
+                
+                statusContent.innerHTML = `
+                    <div class="loading-message">
+                        <div class="circular-loader">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                        <div class="loading-text">${displayMessage}</div>
+                    </div>
+                `;
+            } else {
+                statusContent.textContent = message;
+            }
+            
+            // ステータスセクションを表示
+            statusSection.classList.remove('hidden');
+            
+            // 初期化中や生成中の場合、progressSectionも表示する（statusSectionがその中にあるため）
+            if (type === 'initializing' || type === 'generating') {
+                const progressSection = document.getElementById('progressSection');
+                const progressTitle = document.getElementById('progressTitle');
+                const progressContent = document.getElementById('progressContent');
+                
+                if (progressSection) {
+                    progressSection.classList.remove('hidden');
+                }
+                
+                // 初期化中はタイトルとコンテンツを非表示、生成中は表示
+                if (type === 'initializing') {
+                    if (progressTitle) progressTitle.classList.add('hidden');
+                    if (progressContent) progressContent.classList.add('hidden');
+                } else {
+                    // 生成中は既に表示されているはず（onSessionReadyで表示される）
+                    if (progressTitle) progressTitle.classList.remove('hidden');
+                    if (progressContent) progressContent.classList.remove('hidden');
+                }
+            }
+        }
+        
+        function updateDirectionLabel() {
+            const phaseNames = {
+                'ki': '起',
+                'sho': '承',
+                'ten': '転',
+                'ketsu': '結'
+            };
+
+            const phaseName = phaseNames[currentPhase] || '起';
+            const label = document.getElementById('directionLabel');
+
+            if (label) {
+                label.textContent = `「${phaseName}」フェーズで次の要素を加える。要素を加えない場合は空欄のまま「次へ進む」をクリック：`;
+                console.log('[DEBUG] Label updated to:', phaseName);
+            } else {
+                console.error('[ERROR] directionLabel element not found');
+            }
+
+            // 選択肢を取得
+            loadSuggestions();
+        }
+
+        // 選択肢を取得する関数
+        async function loadSuggestions() {
+            if (!sessionId) {
+                console.log('[DEBUG] セッションIDがないため、選択肢を取得しません');
+                return;
+            }
+
+            const suggestionsContainer = document.getElementById('suggestionsContainer');
+            const suggestionsList = document.getElementById('suggestionsList');
+
+            // コンテナを表示
+            suggestionsContainer.classList.remove('hidden');
+            suggestionsList.innerHTML = '<div class="suggestions-loading">提案を生成中...</div>';
+
+            try {
+                const response = await fetch(`/suggestions/${sessionId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('[ERROR] 選択肢取得エラー:', data.error);
+                    suggestionsContainer.classList.add('hidden');
+                    return;
+                }
+
+                const suggestions = data.suggestions || [];
+
+                if (suggestions.length === 0) {
+                    // 提案がまだ生成されていない場合は少し待ってリトライ
+                    setTimeout(loadSuggestions, 2000);
+                    return;
+                }
+
+                // 選択肢を表示
+                suggestionsList.innerHTML = '';
+                suggestions.forEach((suggestion, index) => {
+                    const chip = document.createElement('div');
+                    chip.className = 'suggestion-chip';
+                    chip.textContent = suggestion;
+                    chip.onclick = () => {
+                        // クリックしたらテキストエリアに入力
+                        document.getElementById('directionInput').value = suggestion;
+                        // 選択されたチップをハイライト
+                        document.querySelectorAll('.suggestion-chip').forEach(c => c.style.fontWeight = 'normal');
+                        chip.style.fontWeight = 'bold';
+                    };
+                    suggestionsList.appendChild(chip);
+                });
+
+                console.log('[DEBUG] 選択肢を表示しました:', suggestions);
+
+            } catch (error) {
+                console.error('[ERROR] 選択肢取得エラー:', error);
+                suggestionsContainer.classList.add('hidden');
+            }
+        }
+
+        // 選択肢をクリアする関数
+        function clearSuggestions() {
+            const suggestionsContainer = document.getElementById('suggestionsContainer');
+            if (suggestionsContainer) {
+                suggestionsContainer.classList.add('hidden');
+            }
+        }
+
+        // ダークモード切り替え
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = newTheme === 'dark' ? 'Light' : 'Dark';
+        }
+
+        // テーマの初期化
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.getElementById('themeIcon');
+            icon.textContent = savedTheme === 'dark' ? 'Light' : 'Dark';
+        }
+
+        // ナビゲーション機能
+        function scrollToSection(sectionId) {
+            console.log('[DEBUG] scrollToSection called:', sectionId);
+            let element = null;
+            
+            // セクションIDのマッピング
+            const sectionMap = {
+                'characters': 'charactersSection',
+                'story': 'conversationSection',
+                'result': 'summarySection',  // 要約セクションに直接スクロール
+                'summary': 'summarySection'  // 要約セクションに直接スクロール
+            };
+            
+            const mappedId = sectionMap[sectionId] || sectionId;
+            element = document.getElementById(mappedId) || document.getElementById(sectionId + 'Section') || document.getElementById(sectionId);
+            
+            if (element) {
+                console.log('[DEBUG] Scrolling to element:', element.id);
+                // 要約セクションの場合は、少し上に余白を追加してスクロール
+                if (sectionId === 'summary' || sectionId === 'result') {
+                    const yOffset = -20; // ヘッダー分のオフセット
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                } else {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                
+                // ナビゲーションのアクティブ状態を更新
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                    if (item.getAttribute('href') === '#' + sectionId || item.textContent.trim() === '要約') {
+                        item.classList.add('active');
+                    }
+                });
+            } else {
+                console.warn('[WARN] Element not found:', sectionId, mappedId);
+            }
+        }
+
+        function scrollToPhase(phase) {
+            const phaseMap = { 'ki': '起', 'sho': '承', 'ten': '転', 'ketsu': '結' };
+            const conversations = document.querySelectorAll('.conversation-item');
+            conversations.forEach(item => {
+                const badge = item.querySelector('.phase-badge');
+                if (badge && badge.textContent === phaseMap[phase]) {
+                    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    item.style.animation = 'pulse 0.5s';
+                    setTimeout(() => item.style.animation = '', 500);
+                }
+            });
+        }
+
+        // プログレスバー更新
+        function updateProgress(phase, isComplete = false) {
+            // 各フェーズの完了時に更新
+            let phaseProgress = { 
+                'ki': 25,   // 起フェーズ完了時
+                'sho': 50,  // 承フェーズ完了時
+                'ten': 75,  // 転フェーズ完了時
+                'ketsu': 100 // 結フェーズ完了時
+            };
+            
+            const progress = phaseProgress[phase] || 0;
+            console.log('[DEBUG] updateProgress called:', phase, 'isComplete:', isComplete, 'progress:', progress);
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            if (progressFill) {
+                progressFill.style.width = progress + '%';
+            }
+            if (progressText) {
+                if (isComplete || phase === 'ketsu') {
+                    progressText.textContent = `進行状況: ${progress}% (完了)`;
+                } else {
+                    progressText.textContent = `進行状況: ${progress}%`;
+                }
+            }
+            if (progressContainer) {
+                progressContainer.classList.remove('hidden');
+            }
+        }
+
+        // 内心描写のトグル
+        function toggleThoughts(element) {
+            const content = element.nextElementSibling;
+            const isCollapsed = content.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                content.classList.remove('collapsed');
+                element.textContent = '内心を隠す';
+            } else {
+                content.classList.add('collapsed');
+                element.textContent = '内心を表示';
+            }
+            
+            thoughtsCollapsed = !isCollapsed;
+            localStorage.setItem('thoughtsCollapsed', thoughtsCollapsed);
+        }
+
+        // コピー機能
+        async function copyToClipboard(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (err) {
+                // フォールバック
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    return true;
+                } catch (err) {
+                    document.body.removeChild(textArea);
+                    return false;
+                }
+            }
+        }
+
+        function copySummary() {
+            const summaryText = document.getElementById('summaryText').textContent;
+            if (copyToClipboard(summaryText)) {
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ コピーしました';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } else {
+                alert('コピーに失敗しました');
+            }
+        }
+
+        function copyConversation(index) {
+            const convItem = document.getElementById(`conv-${index}`);
+            const speaker = convItem.querySelector('.speaker-name').textContent.trim();
+            const narrative = convItem.querySelector('.narrative').textContent.trim();
+            const thoughts = Array.from(convItem.querySelectorAll('.inner-thought')).map(t => t.textContent.trim()).join('\n');
+            
+            const text = `${speaker}\n${narrative}${thoughts ? '\n\n' + thoughts : ''}`;
+            
+            if (copyToClipboard(text)) {
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            } else {
+                alert('コピーに失敗しました');
+            }
+        }
+
+        // スクロールトップ機能
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ページ読み込み時の初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            
+            // スクロール時のナビゲーション更新とスクロールトップボタン表示
+            let lastScrollTop = 0;
+            window.addEventListener('scroll', function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // スクロールトップボタンの表示/非表示
+                const scrollTopBtn = document.querySelector('.scroll-top-btn');
+                if (scrollTopBtn) {
+                    if (scrollTop > 300) {
+                        scrollTopBtn.classList.add('visible');
+                    } else {
+                        scrollTopBtn.classList.remove('visible');
+                    }
+                }
+                
+                // スクロール方向に応じてナビゲーションを表示/非表示
+                const sideNav = document.getElementById('sideNav');
+                if (sideNav && sideNav.classList.contains('visible')) {
+                    if (scrollTop > lastScrollTop && scrollTop > 100) {
+                        // 下にスクロール
+                        sideNav.style.opacity = '0.8';
+                    } else {
+                        // 上にスクロール
+                        sideNav.style.opacity = '1';
+                    }
+                }
+                lastScrollTop = scrollTop;
+            });
+
+            // キーボードショートカット
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K でテーマ切り替え
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    toggleTheme();
+                }
+                
+                // 矢印キーでフェーズ移動（Alt押下時）
+                if (e.altKey && currentPhase) {
+                    const phaseOrder = ['ki', 'sho', 'ten', 'ketsu'];
+                    const currentIndex = phaseOrder.indexOf(currentPhase);
+                    
+                    if (e.key === 'ArrowRight' && currentIndex < phaseOrder.length - 1) {
+                        e.preventDefault();
+                        scrollToPhase(phaseOrder[currentIndex + 1]);
+                    } else if (e.key === 'ArrowLeft' && currentIndex > 0) {
+                        e.preventDefault();
+                        scrollToPhase(phaseOrder[currentIndex - 1]);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

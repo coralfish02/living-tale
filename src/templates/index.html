@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Echo - 自律対話型ドラマ生成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        .input-section label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .input-section textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .examples {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .examples h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .examples ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+        
+        .examples li {
+            margin: 5px 0;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .examples li:hover {
+            color: #667eea;
+        }
+        
+        .examples li::before {
+            content: "💡 ";
+        }
+        
+        .button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-section {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .progress-section.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-text {
+            font-size: 18px;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .result-section {
+            display: none;
+        }
+        
+        .result-section.active {
+            display: block;
+        }
+        
+        .character {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .character-name {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .character-detail {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .act {
+            margin: 20px 0;
+        }
+        
+        .act-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .dialogue {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .speaker {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .speech {
+            margin: 8px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .inner-thought {
+            color: #888;
+            font-style: italic;
+            margin-top: 8px;
+            padding-left: 15px;
+            border-left: 3px solid #ddd;
+        }
+        
+        .inner-thought::before {
+            content: "💭 ";
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .summary h3 {
+            margin-bottom: 15px;
+        }
+        
+        .summary-text {
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .reset-button {
+            margin-top: 20px;
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Project Echo</h1>
+            <p>～書かずに、育てる物語～</p>
+        </div>
+        
+        <!-- 入力セクション -->
+        <div class="card" id="inputSection">
+            <div class="input-section">
+                <label for="themeInput">ストーリーのテーマを入力してください</label>
+                <textarea 
+                    id="themeInput" 
+                    placeholder="例: 学園祭の予算が5万円消えた。生徒会メンバーの誰かが使い込んだ疑惑。"
+                ></textarea>
+                
+                <div class="examples">
+                    <h4>💡 テーマ例（クリックで入力）</h4>
+                    <ul>
+                        <li onclick="setTheme('学園祭の予算が5万円消えた。生徒会メンバーの誰かが使い込んだ疑惑。')">
+                            学園祭の予算が5万円消えた
+                        </li>
+                        <li onclick="setTheme('修学旅行最終日。誰かが大切な記念品を盗んだ。')">
+                            修学旅行で記念品が盗まれた
+                        </li>
+                        <li onclick="setTheme('生徒会選挙。表向きは爽やかだが、裏で策略が渦巻く。')">
+                            生徒会選挙で策略が渦巻く
+                        </li>
+                        <li onclick="setTheme('文化祭の準備中、誰かが大切な小道具を壊した。犯人探しが始まる。')">
+                            文化祭で小道具が壊された
+                        </li>
+                        <li onclick="setTheme('クラスの人気者が突然不登校に。実は裏でいじめがあった。')">
+                            人気者が不登校になった理由
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <button class="button" onclick="generateStory()">
+                ✨ ストーリーを生成
+            </button>
+        </div>
+        
+        <!-- 進捗セクション -->
+        <div class="card progress-section" id="progressSection">
+            <div class="spinner"></div>
+            <div class="progress-text" id="progressText">生成を開始します...</div>
+        </div>
+        
+        <!-- 結果セクション -->
+        <div class="card result-section" id="resultSection">
+            <h2>📖 生成されたストーリー</h2>
+            
+            <div id="charactersSection"></div>
+            <div id="storySection"></div>
+            <div id="summarySection"></div>
+            
+            <button class="button reset-button" onclick="reset()">
+                🔄 新しいストーリーを作る
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function setTheme(theme) {
+            document.getElementById('themeInput').value = theme;
+        }
+        
+        async function generateStory() {
+            const theme = document.getElementById('themeInput').value.trim();
+            
+            if (!theme) {
+                alert('テーマを入力してください');
+                return;
+            }
+            
+            // UI切り替え
+            document.getElementById('inputSection').style.display = 'none';
+            document.getElementById('progressSection').classList.add('active');
+            
+            // 生成開始
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({theme: theme})
+                });
+                
+                if (!response.ok) {
+                    throw new Error('生成開始に失敗しました');
+                }
+                
+                // 進捗監視
+                watchProgress();
+                
+            } catch (error) {
+                alert('エラー: ' + error.message);
+                reset();
+            }
+        }
+        
+        function watchProgress() {
+            const eventSource = new EventSource('/progress');
+            
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                document.getElementById('progressText').textContent = 
+                    data.step + ': ' + data.message;
+                
+                if (data.status === 'completed') {
+                    eventSource.close();
+                    loadResult();
+                } else if (data.status === 'error') {
+                    eventSource.close();
+                    alert('エラーが発生しました: ' + data.message);
+                    reset();
+                }
+            };
+        }
+        
+        async function loadResult() {
+            try {
+                const response = await fetch('/result');
+                const data = await response.json();
+                
+                displayResult(data);
+                
+                document.getElementById('progressSection').classList.remove('active');
+                document.getElementById('resultSection').classList.add('active');
+                
+            } catch (error) {
+                alert('結果の取得に失敗しました');
+                reset();
+            }
+        }
+        
+        function displayResult(data) {
+            // キャラクター表示
+            let charactersHTML = '<h3>👥 キャラクター</h3>';
+            data.characters.forEach(char => {
+                charactersHTML += `
+                    <div class="character">
+                        <div class="character-name">${char.name}（${char.age}歳）</div>
+                        <div class="character-detail">表: ${char.public_persona}</div>
+                        <div class="character-detail">裏: ${char.secret_goal}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('charactersSection').innerHTML = charactersHTML;
+            
+            // ストーリー表示
+            let storyHTML = '<h3>📝 ストーリー</h3>';
+            data.story.acts.forEach(act => {
+                storyHTML += `
+                    <div class="act">
+                        <div class="act-title">${act.title}</div>
+                `;
+                
+                act.conversations.forEach(conv => {
+                    storyHTML += `
+                        <div class="dialogue">
+                            <div class="speaker">${conv.speaker}</div>
+                            <div class="speech">「${conv.dialogue}」</div>
+                            <div class="inner-thought">${conv.inner_thought}</div>
+                        </div>
+                    `;
+                });
+                
+                storyHTML += '</div>';
+            });
+            document.getElementById('storySection').innerHTML = storyHTML;
+            
+            // 要約表示
+            let summaryHTML = `
+                <div class="summary">
+                    <h3>📌 ストーリー要約</h3>
+                    <div class="summary-text">${data.summary}</div>
+                </div>
+            `;
+            document.getElementById('summarySection').innerHTML = summaryHTML;
+        }
+        
+        function reset() {
+            document.getElementById('inputSection').style.display = 'block';
+            document.getElementById('progressSection').classList.remove('active');
+            document.getElementById('resultSection').classList.remove('active');
+            document.getElementById('themeInput').value = '';
+        }
+    </script>
+</body>
+</html>
