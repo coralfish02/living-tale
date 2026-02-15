@@ -18,7 +18,7 @@
 
 ## 🌐 デモ
 
-**公開URL**: [https://project-echo-192671776924.us-central1.run.app](https://project-echo-192671776924.us-central1.run.app)
+**公開URL**: [https://living-tale-551115298648.us-central1.run.app/](https://living-tale-551115298648.us-central1.run.app/)
 
 テーマを入力するだけで、AIが自動でストーリーを生成します。
 

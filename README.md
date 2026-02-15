@@ -10,7 +10,7 @@
 
 ## 🌐 デモ
 
-**公開URL**: https://project-echo-192671776924.us-central1.run.app
+**公開URL**: https://living-tale-551115298648.us-central1.run.app/
 
 テーマを1行入力するだけで、AIキャラクターが自律的に会話し、起承転結のある物語が生成されます。
 
