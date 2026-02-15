@@ -18,7 +18,7 @@ import base64
 # ========================================
 # 設定
 # ========================================
-PROJECT_ID = "project-echo-2026"
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or "YOUR_PROJECT_ID"
 LOCATION = "us-central1"
 
 app = Flask(__name__)

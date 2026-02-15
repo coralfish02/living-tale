@@ -14,6 +14,7 @@ Project Echo - Webブラウザ版（完全修正版）
    - 会話終了後に起承転結を分類
 """
 
+import os
 from flask import Flask, render_template, request, jsonify, Response
 import vertexai
 from vertexai.preview.generative_models import GenerativeModel
@@ -24,7 +25,7 @@ import threading
 # ========================================
 # 設定
 # ========================================
-PROJECT_ID = "gen-lang-client-0239094918"
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or "YOUR_PROJECT_ID"
 LOCATION = "us-central1"
 
 app = Flask(__name__)

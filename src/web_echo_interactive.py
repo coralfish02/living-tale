@@ -19,7 +19,7 @@ import base64
 # ========================================
 # プロジェクトIDを環境変数または現在のgcloud設定から取得
 import os
-PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or "project-da9ea0f1-155c-4d54-b47"
+PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or "YOUR_PROJECT_ID"
 LOCATION = "us-central1"
 
 app = Flask(__name__)
