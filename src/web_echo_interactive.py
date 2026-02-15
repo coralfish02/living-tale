@@ -5,7 +5,7 @@ Project Echo - AI自律対話型ドラマ生成システム
 ユーザーが各フェーズ（起承転結）で方向性を指示できる
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import vertexai
 from vertexai.preview.generative_models import GenerativeModel
 from vertexai.preview.vision_models import ImageGenerationModel
@@ -13,12 +13,12 @@ import json
 import time
 import threading
 import base64
+import os
 
 # ========================================
 # 設定
 # ========================================
 # プロジェクトIDを環境変数または現在のgcloud設定から取得
-import os
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT") or "YOUR_PROJECT_ID"
 LOCATION = "us-central1"
 
@@ -98,19 +98,18 @@ def extract_json(text):
 # ========================================
 def generate_comic(session_id):
     """
-    起承転結の全フェーズを含む16コマ漫画を1枚の画像として生成する
+    ストーリー全体の重要なシーンを1枚のイメージイラストとして生成
     結フェーズ完了後に呼び出される
     """
     session = sessions.get(session_id)
     if not session:
         return
 
-    print(f"[INFO] 16コマ漫画生成開始: {session_id}")
+    print(f"[INFO] ストーリーイメージ生成開始: {session_id}")
     session['comic_status'] = 'generating'
     session['comic_images'] = []
 
     generator = GenerativeModel("gemini-2.0-flash-001")
-    imagen = ImageGenerationModel.from_pretrained("imagen-3.0-generate-002")
 
     phases = [
         ('ki',    '起'),
@@ -124,123 +123,111 @@ def generate_comic(session_id):
     characters = session.get('characters', [])
     char_desc = "、".join([f"{c['name']}（{c['age']}歳、{c['public_persona']}）" for c in characters])
 
-    # 全フェーズの物語を1つの文章にまとめる
+    # 全フェーズの物語を取得して統合
     full_story = {}
+    story_text = ""
     for phase_key, phase_label in phases:
         phase_msgs = [m for m in all_conversation if m.get('phase') == phase_key]
         if phase_msgs:
             full_story[phase_key] = phase_msgs[0]['narrative']
+            story_text += f"{phase_label}: {phase_msgs[0]['narrative']}\n"
         else:
             full_story[phase_key] = ""
 
-    story_summary = "\n\n".join([f"【{phases[i][1]}】{full_story[phases[i][0]]}" for i in range(len(phases)) if full_story[phases[i][0]]])
+    print(f"[INFO] 全4フェーズのストーリー取得完了")
 
-    print(f"[INFO] 全体のストーリーコンテキスト取得完了（{len(story_summary)}文字）")
-
-    # Step1: Geminiで16コマ漫画用の英語プロンプト生成
-    print(f"[INFO] 16コマ漫画プロンプト生成中...")
     try:
-        prompt_text = call_with_retry(generator, f"""
-以下の物語全体を、16コマ漫画（4x4グリッド）のImagenプロンプトに変換してください。
+        imagen = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
 
-【物語全体】
-{story_summary}
+        # 1枚のイメージイラストを生成（起承転結の最も重要なシーン）
+        print(f"[INFO] ストーリーイメージ生成中...")
 
-【登場人物】
-{char_desc}
+        # Geminiでストーリー全体を短く要約（画像生成用に最適化）
+        summary_prompt = f"""
+以下の起承転結のストーリー全体から、最も印象的なシーンを画像生成用に30語以内の英語で要約してください。
+キャラクターの動作、表情、場所のみ。セリフは不要。
 
-【16コマ漫画レイアウト】
-- 4x4グリッドレイアウト（縦4行×横4列）
-- 1行目（上から1列目）：起フェーズ（4コマ）
-- 2行目（上から2列目）：承フェーズ（4コマ）
-- 3行目（上から3列目）：転フェーズ（4コマ）
-- 4行目（上から4列目）：結フェーズ（4コマ）
+ストーリー全体:
+{story_text[:500]}
 
-【画像スタイル】
-- アニメ風カラーイラスト
-- 2人のキャラクターの容姿・服装を16コマ全体で統一
-- マンガパネルスタイル
-- 各コマに日本語の吹き出し
+キャラクター: {char_desc}
 
-【出力条件】
-- 60語以内の英語で出力
-- プロンプト文のみ出力（説明不要）
-- 16コマ漫画レイアウトであることを明記
-""")
-        time.sleep(8)  # Gemini レート制限対策
-    except Exception as e:
-        print(f"[ERROR] プロンプト生成失敗: {e}")
-        session['comic_images'] = []
-        session['comic_status'] = 'error'
-        return
+英語30語以内で出力:"""
 
-    # Step2: Imagenで16コマ漫画を1枚の画像として生成
-    print(f"[INFO] 16コマ漫画生成中... プロンプト: {prompt_text[:60]}...")
-    try:
-        # ★ 16コマ漫画レイアウトを明示的に指定
-        full_prompt = f"16-panel manga layout, 4x4 grid, anime style, colorful illustration, consistent character design, {prompt_text}, 2 characters, Japanese text in speech bubbles, manga panel style, same art style throughout all panels"
+        try:
+            scene_summary = call_with_retry(generator, summary_prompt)
+            print(f"[DEBUG] Scene summary: {scene_summary}")
 
-        images = imagen.generate_images(
-            prompt=full_prompt,
-            number_of_images=1,
-            aspect_ratio="1:1",
-            safety_filter_level="block_some",
-            person_generation="allow_adult",
-        )
+            # シンプルなプロンプト（要約版）
+            image_prompt = f"Anime style illustration: {scene_summary}. No text, no speech bubbles."
+            print(f"[DEBUG] Final prompt: {image_prompt}")
 
-        # 画像をファイルに保存
-        filename = f"{session_id}_16panel.png"
-        filepath = os.path.join(IMAGE_DIR, filename)
-        images[0].save(location=filepath, include_generation_parameters=False)
+        except Exception as summary_error:
+            print(f"[WARN] 要約生成エラー、フォールバック使用: {str(summary_error)}")
+            # 要約失敗時のフォールバック
+            story_brief = story_text[:150]
+            image_prompt = f"Anime style: {story_brief}. No text."
 
-        image_url = f"/static/images/{filename}"
-        comic_images = [{
-            "phase": "全体（16コマ）",
-            "image_url": image_url,
-            "prompt": prompt_text
-        }]
-        print(f"[OK] 16コマ漫画生成完了: {image_url}")
+        retry_count = 0
+        max_retries = 3
+        image_url = None
 
-    except Exception as e:
-        error_msg = str(e)
-        print(f"[ERROR] 16コマ漫画生成失敗: {error_msg}")
-
-        # 429エラーの場合は特別な処理
-        if "429" in error_msg or "Quota exceeded" in error_msg:
-            print(f"[WARN] API制限に達しました。60秒待機後にリトライします...")
-            time.sleep(60)
-
-            # リトライを1回だけ実行
+        while retry_count < max_retries:
             try:
-                print(f"[INFO] 16コマ漫画生成をリトライ中...")
+                time.sleep(5)  # Rate limit対策
+
                 images = imagen.generate_images(
-                    prompt=full_prompt,
+                    prompt=image_prompt,
                     number_of_images=1,
-                    aspect_ratio="1:1",
-                    safety_filter_level="block_some",
-                    person_generation="allow_adult",
                 )
 
-                filename = f"{session_id}_16panel.png"
+                if not images:
+                    raise Exception("画像生成APIが空のレスポンスを返しました")
+
+                # 画像をファイルに保存
+                filename = f"{session_id}_story.png"
                 filepath = os.path.join(IMAGE_DIR, filename)
+
+                # imagesはリストなので[0]でアクセス
                 images[0].save(location=filepath, include_generation_parameters=False)
 
                 image_url = f"/static/images/{filename}"
-                comic_images = [{
-                    "phase": "全体（16コマ）",
-                    "image_url": image_url,
-                    "prompt": prompt_text
-                }]
-                print(f"[OK] 16コマ漫画生成完了（リトライ成功）: {image_url}")
-            except Exception as retry_error:
-                print(f"[ERROR] リトライも失敗: {retry_error}")
-                comic_images = [{"phase": "全体（16コマ）", "image_url": None, "error": str(retry_error)}]
-        else:
-            comic_images = [{"phase": "全体（16コマ）", "image_url": None, "error": error_msg}]
+                print(f"[OK] ストーリーイメージ生成完了: {image_url}")
+                break
 
-    session['comic_images'] = comic_images
-    session['comic_status'] = 'complete'
-    print(f"[INFO] 16コマ漫画生成完了: {session_id}")
+            except Exception as img_error:
+                retry_count += 1
+                wait_time = retry_count * 5
+                print(f"[WARN] 画像生成エラー (試行 {retry_count}/{max_retries}): {str(img_error)}")
+                if retry_count < max_retries:
+                    time.sleep(wait_time)
+
+        if image_url:
+            # 1枚の画像のみ
+            session['comic_images'] = [{
+                "phase": "story",
+                "image_url": image_url,
+                "prompt": image_prompt
+            }]
+        else:
+            print(f"[ERROR] ストーリーイメージ生成に失敗しました")
+            session['comic_images'] = []
+
+        session['comic_status'] = 'complete'
+
+        print(f"[OK] ストーリーイメージ生成完了: 1枚")
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[ERROR] 4コマ漫画生成失敗: {error_msg}")
+        print(f"[ERROR] Full error traceback:")
+        import traceback
+        traceback.print_exc()
+
+        session['comic_images'] = []
+        session['comic_status'] = 'error'
+
+    print(f"[INFO] 4コマ漫画生成処理完了: {session_id}")
 
 # ========================================
 # フェーズ別生成
